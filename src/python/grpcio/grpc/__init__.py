@@ -956,10 +956,7 @@ def unary_stream_rpc_method_handler(
     An RpcMethodHandler for a unary-stream RPC method constructed from the
       given parameters.
   """
-  from grpc import _utilities
-  return _utilities.RpcMethodHandler(
-      False, True, request_deserializer, response_serializer, None, behavior,
-      None, None)
+  raise NotImplementedError()
 
 
 def stream_unary_rpc_method_handler(
@@ -976,10 +973,7 @@ def stream_unary_rpc_method_handler(
     An RpcMethodHandler for a stream-unary RPC method constructed from the
       given parameters.
   """
-  from grpc import _utilities
-  return _utilities.RpcMethodHandler(
-      True, False, request_deserializer, response_serializer, None, None,
-      behavior, None)
+  raise NotImplementedError()
 
 
 def stream_stream_rpc_method_handler(
@@ -997,10 +991,7 @@ def stream_stream_rpc_method_handler(
     An RpcMethodHandler for a stream-stream RPC method constructed from the
       given parameters.
   """
-  from grpc import _utilities
-  return _utilities.RpcMethodHandler(
-      True, True, request_deserializer, response_serializer, None, None, None,
-      behavior)
+  raise NotImplementedError()
 
 
 def method_handlers_generic_handler(service, method_handlers):
