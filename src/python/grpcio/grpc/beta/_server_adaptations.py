@@ -79,8 +79,7 @@ class _FaceServicerContext(face.ServicerContext):
     return _ServerProtocolContext(self._servicer_context)
 
   def invocation_metadata(self):
-    return _common.cygrpc_metadata(
-        self._servicer_context.invocation_metadata())
+    return self._servicer_context.invocation_metadata()
 
   def initial_metadata(self, initial_metadata):
     self._servicer_context.send_initial_metadata(initial_metadata)

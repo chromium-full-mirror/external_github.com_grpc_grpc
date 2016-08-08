@@ -36,44 +36,8 @@ import time
 import six
 
 import grpc
-from grpc._cython import cygrpc
 
 _EMPTY_METADATA = cygrpc.Metadata(())
-
-CYGRPC_CONNECTIVITY_STATE_TO_CHANNEL_CONNECTIVITY = {
-    cygrpc.ConnectivityState.idle: grpc.ChannelConnectivity.IDLE,
-    cygrpc.ConnectivityState.connecting: grpc.ChannelConnectivity.CONNECTING,
-    cygrpc.ConnectivityState.ready: grpc.ChannelConnectivity.READY,
-    cygrpc.ConnectivityState.transient_failure:
-        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
-    cygrpc.ConnectivityState.shutdown:
-        grpc.ChannelConnectivity.SHUTDOWN,
-}
-
-CYGRPC_STATUS_CODE_TO_STATUS_CODE = {
-    cygrpc.StatusCode.ok: grpc.StatusCode.OK,
-    cygrpc.StatusCode.cancelled: grpc.StatusCode.CANCELLED,
-    cygrpc.StatusCode.unknown: grpc.StatusCode.UNKNOWN,
-    cygrpc.StatusCode.invalid_argument: grpc.StatusCode.INVALID_ARGUMENT,
-    cygrpc.StatusCode.deadline_exceeded: grpc.StatusCode.DEADLINE_EXCEEDED,
-    cygrpc.StatusCode.not_found: grpc.StatusCode.NOT_FOUND,
-    cygrpc.StatusCode.already_exists: grpc.StatusCode.ALREADY_EXISTS,
-    cygrpc.StatusCode.permission_denied: grpc.StatusCode.PERMISSION_DENIED,
-    cygrpc.StatusCode.unauthenticated: grpc.StatusCode.UNAUTHENTICATED,
-    cygrpc.StatusCode.resource_exhausted: grpc.StatusCode.RESOURCE_EXHAUSTED,
-    cygrpc.StatusCode.failed_precondition: grpc.StatusCode.FAILED_PRECONDITION,
-    cygrpc.StatusCode.aborted: grpc.StatusCode.ABORTED,
-    cygrpc.StatusCode.out_of_range: grpc.StatusCode.OUT_OF_RANGE,
-    cygrpc.StatusCode.unimplemented: grpc.StatusCode.UNIMPLEMENTED,
-    cygrpc.StatusCode.internal: grpc.StatusCode.INTERNAL,
-    cygrpc.StatusCode.unavailable: grpc.StatusCode.UNAVAILABLE,
-    cygrpc.StatusCode.data_loss: grpc.StatusCode.DATA_LOSS,
-}
-STATUS_CODE_TO_CYGRPC_STATUS_CODE = {
-    grpc_code: cygrpc_code
-    for cygrpc_code, grpc_code in six.iteritems(
-        CYGRPC_STATUS_CODE_TO_STATUS_CODE)
-}
 
 
 def encode(s):
@@ -92,12 +56,6 @@ def decode(b):
     except UnicodeDecodeError:
       logging.exception('Invalid encoding on {}'.format(b))
       return b.decode('latin1')
-
-
-def cygrpc_metadata(application_metadata):
-  return _EMPTY_METADATA if application_metadata is None else cygrpc.Metadata(
-      cygrpc.Metadatum(encode(key), encode(value))
-      for key, value in application_metadata)
 
 
 def application_metadata(cygrpc_metadata):

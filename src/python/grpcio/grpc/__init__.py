@@ -34,8 +34,6 @@ import enum
 
 import six
 
-from grpc._cython import cygrpc as _cygrpc
-
 
 ############################## Future Interface  ###############################
 
@@ -212,39 +210,33 @@ class ChannelConnectivity(enum.Enum):
       recover.
     SHUTDOWN: The channel has seen a failure from which it cannot recover.
   """
-  IDLE              = (_cygrpc.ConnectivityState.idle, 'idle')
-  CONNECTING        = (_cygrpc.ConnectivityState.connecting, 'connecting')
-  READY             = (_cygrpc.ConnectivityState.ready, 'ready')
-  TRANSIENT_FAILURE = (
-      _cygrpc.ConnectivityState.transient_failure, 'transient failure')
-  SHUTDOWN          = (_cygrpc.ConnectivityState.shutdown, 'shutdown')
+  IDLE              = (0, 'idle')
+  CONNECTING        = (1, 'connecting')
+  READY             = (2, 'ready')
+  TRANSIENT_FAILURE = (3, 'transient failure')
+  SHUTDOWN          = (4, 'shutdown')
 
 
 @enum.unique
 class StatusCode(enum.Enum):
   """Mirrors grpc_status_code in the gRPC Core."""
-  OK                  = (_cygrpc.StatusCode.ok, 'ok')
-  CANCELLED           = (_cygrpc.StatusCode.cancelled, 'cancelled')
-  UNKNOWN             = (_cygrpc.StatusCode.unknown, 'unknown')
-  INVALID_ARGUMENT    = (
-      _cygrpc.StatusCode.invalid_argument, 'invalid argument')
-  DEADLINE_EXCEEDED   = (
-      _cygrpc.StatusCode.deadline_exceeded, 'deadline exceeded')
-  NOT_FOUND           = (_cygrpc.StatusCode.not_found, 'not found')
-  ALREADY_EXISTS      = (_cygrpc.StatusCode.already_exists, 'already exists')
-  PERMISSION_DENIED   = (
-      _cygrpc.StatusCode.permission_denied, 'permission denied')
-  RESOURCE_EXHAUSTED  = (
-      _cygrpc.StatusCode.resource_exhausted, 'resource exhausted')
-  FAILED_PRECONDITION = (
-      _cygrpc.StatusCode.failed_precondition, 'failed precondition')
-  ABORTED             = (_cygrpc.StatusCode.aborted, 'aborted')
-  OUT_OF_RANGE        = (_cygrpc.StatusCode.out_of_range, 'out of range')
-  UNIMPLEMENTED       = (_cygrpc.StatusCode.unimplemented, 'unimplemented')
-  INTERNAL            = (_cygrpc.StatusCode.internal, 'internal')
-  UNAVAILABLE         = (_cygrpc.StatusCode.unavailable, 'unavailable')
-  DATA_LOSS           = (_cygrpc.StatusCode.data_loss, 'data loss')
-  UNAUTHENTICATED     = (_cygrpc.StatusCode.unauthenticated, 'unauthenticated')
+  OK                  = (1, 'ok')
+  CANCELLED           = (2, 'cancelled')
+  UNKNOWN             = (3, 'unknown')
+  INVALID_ARGUMENT    = (4, 'invalid argument')
+  DEADLINE_EXCEEDED   = (5, 'deadline exceeded')
+  NOT_FOUND           = (6, 'not found')
+  ALREADY_EXISTS      = (7, 'already exists')
+  PERMISSION_DENIED   = (8, 'permission denied')
+  RESOURCE_EXHAUSTED  = (9, 'resource exhausted')
+  FAILED_PRECONDITION = (10, 'failed precondition')
+  ABORTED             = (11, 'aborted')
+  OUT_OF_RANGE        = (12, 'out of range')
+  UNIMPLEMENTED       = (13, 'unimplemented')
+  INTERNAL            = (14, 'internal')
+  UNAVAILABLE         = (15, 'unavailable')
+  DATA_LOSS           = (16, 'data loss')
+  UNAUTHENTICATED     = (17, 'unauthenticated')
 
 
 #############################  gRPC Exceptions  ################################
@@ -1041,12 +1033,7 @@ def ssl_channel_credentials(
   Returns:
     A ChannelCredentials for use with an SSL-enabled Channel.
   """
-  if private_key is not None or certificate_chain is not None:
-    pair = _cygrpc.SslPemKeyCertPair(private_key, certificate_chain)
-  else:
-    pair = None
-  return ChannelCredentials(
-      _cygrpc.channel_credentials_ssl(root_certificates, pair))
+  raise NotImplementedError()
 
 
 def metadata_call_credentials(metadata_plugin, name=None):
@@ -1060,17 +1047,7 @@ def metadata_call_credentials(metadata_plugin, name=None):
   Returns:
     A CallCredentials.
   """
-  from grpc import _plugin_wrapping
-  if name is None:
-    try:
-      effective_name = metadata_plugin.__name__
-    except AttributeError:
-      effective_name = metadata_plugin.__class__.__name__
-  else:
-    effective_name = name
-  return CallCredentials(
-      _plugin_wrapping.call_credentials_metadata_plugin(
-          metadata_plugin, effective_name))
+  raise NotImplementedError()
 
 
 def access_token_call_credentials(access_token):
@@ -1083,9 +1060,7 @@ def access_token_call_credentials(access_token):
   Returns:
     A CallCredentials.
   """
-  from grpc import _auth
-  return metadata_call_credentials(
-      _auth.AccessTokenCallCredentials(access_token))
+  raise NotImplementedError()
 
 
 def composite_call_credentials(*call_credentials):
@@ -1097,12 +1072,7 @@ def composite_call_credentials(*call_credentials):
   Returns:
     A CallCredentials object composed of the given CallCredentials objects.
   """
-  from grpc import _credential_composition
-  cygrpc_call_credentials = tuple(
-      single_call_credentials._credentials
-      for single_call_credentials in call_credentials)
-  return CallCredentials(
-      _credential_composition.call(cygrpc_call_credentials))
+  raise NotImplementedError()
 
 
 def composite_channel_credentials(channel_credentials, *call_credentials):
@@ -1116,13 +1086,7 @@ def composite_channel_credentials(channel_credentials, *call_credentials):
     A ChannelCredentials composed of the given ChannelCredentials and
       CallCredentials objects.
   """
-  from grpc import _credential_composition
-  cygrpc_call_credentials = tuple(
-      single_call_credentials._credentials
-      for single_call_credentials in call_credentials)
-  return ChannelCredentials(
-      _credential_composition.channel(
-          channel_credentials._credentials, cygrpc_call_credentials))
+  raise NotImplementedError()
 
 
 def ssl_server_credentials(
@@ -1144,19 +1108,7 @@ def ssl_server_credentials(
   Returns:
     A ServerCredentials for use with an SSL-enabled Server.
   """
-  if len(private_key_certificate_chain_pairs) == 0:
-    raise ValueError(
-        'At least one private key-certificate chain pair is required!')
-  elif require_client_auth and root_certificates is None:
-    raise ValueError(
-        'Illegal to require client auth without providing root certificates!')
-  else:
-    return ServerCredentials(
-        _cygrpc.server_credentials_ssl(
-        root_certificates,
-        [_cygrpc.SslPemKeyCertPair(key, pem)
-         for key, pem in private_key_certificate_chain_pairs],
-        require_client_auth))
+  raise NotImplementedError()
 
 
 def channel_ready_future(channel):
@@ -1173,8 +1125,7 @@ def channel_ready_future(channel):
     A Future that matures when the given Channel has connectivity
       ChannelConnectivity.READY.
   """
-  from grpc import _utilities
-  return _utilities.channel_ready_future(channel)
+  raise NotImplementedError()
 
 
 def insecure_channel(target, options=None):
@@ -1188,8 +1139,7 @@ def insecure_channel(target, options=None):
   Returns:
     A Channel to the target through which RPCs may be conducted.
   """
-  from grpc import _channel
-  return _channel.Channel(target, options, None)
+  raise NotImplementedError()
 
 
 def secure_channel(target, credentials, options=None):
@@ -1204,8 +1154,7 @@ def secure_channel(target, credentials, options=None):
   Returns:
     A Channel to the target through which RPCs may be conducted.
   """
-  from grpc import _channel
-  return _channel.Channel(target, options, credentials._credentials)
+  raise NotImplementedError()
 
 
 def server(thread_pool, handlers=None):
@@ -1223,8 +1172,7 @@ def server(thread_pool, handlers=None):
   Returns:
     A Server with which RPCs can be serviced.
   """
-  from grpc import _server
-  return _server.Server(thread_pool, () if handlers is None else handlers)
+  raise NotImplementedError()
 
 
 ###################################  __all__  #################################
