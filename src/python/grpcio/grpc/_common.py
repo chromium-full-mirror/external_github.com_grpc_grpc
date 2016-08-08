@@ -37,35 +37,6 @@ import six
 
 import grpc
 
-_EMPTY_METADATA = cygrpc.Metadata(())
-
-
-def encode(s):
-  if isinstance(s, bytes):
-    return s
-  else:
-    return s.encode('ascii')
-
-
-def decode(b):
-  if isinstance(b, str):
-    return b
-  else:
-    try:
-      return b.decode('utf8')
-    except UnicodeDecodeError:
-      logging.exception('Invalid encoding on {}'.format(b))
-      return b.decode('latin1')
-
-
-def application_metadata(cygrpc_metadata):
-  if cygrpc_metadata is None:
-    return ()
-  else:
-    return tuple(
-        (decode(key), value if key[-4:] == b'-bin' else decode(value))
-        for key, value in cygrpc_metadata)
-
 
 def _transform(message, transformer, exception_message):
   if transformer is None:
