@@ -144,15 +144,13 @@
   % endfor
     ]
   % if contains_wrap_memcpy(srcs):
-    if (is_android) {
-      # gRPC memcpy wrapping logic isn't Android-friendly.
-      # See https://crbug.com/661171
-      sources -= [
+    # gRPC memcpy wrapping logic isn't useful here.
+    # See https://crbug.com/661171
+    sources -= [
   % for src in get_wrap_memcpy(srcs):
-        "${src}",
+      "${src}",
   % endfor
-      ]
-    }
+    ]
   % endif
     deps = [
   % for dep in get_deps(lib):
